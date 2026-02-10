@@ -7,7 +7,7 @@ document.addEventListener("mousemove",(e1) => {
 document.addEventListener('keydown',(e2) => {
     if(e2.shiftKey) {
         const word = getWordFromMouse(lastMouseEvent)
-        if(word.length > 0) {
+        if (word && word.length > 0) {
             fetchDefinition(word);
             console.log("At fetching word")
         }
@@ -20,7 +20,10 @@ function getWordFromMouse(word) {
   let caret;
   if (document.caretPositionFromPoint) {
     caret = document.caretPositionFromPoint(word.clientX,word.clientY)
-  }
+  } else if (document.caretRangeFromPoint) {
+  let range = document.caretRangeFromPoint(word.clientX, word.clientY);
+  caret = { offsetNode: range.startContainer, offset: range.startOffset };
+}
   console.log("at get word from mouse")
   const node = caret.offsetNode
   const offset = caret.offset
@@ -50,17 +53,11 @@ function fetchDefinition(text) {
   //     const word = data[0].word;
   //     const phonetics = data[0].phonetic;
   //     const definition = data[0].meanings[0].definitions[0].definition;
-  const word = testDict[text].word
+  let word = testDict[text].word
   let phonetics = testDict[text].phonetics
   let definition = testDict[text].def
   if (word) showTooltip(word, definition, phonetics);
   else console.log("no word")
-}
-
-function fuzzyMatch(word) {
-  for (e in dictionary) {
-
-  }
 }
 
 function showTooltip(word, definition = "bruh", phonetics = "") {

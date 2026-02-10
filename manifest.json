@@ -5,8 +5,8 @@
   "permissions": ["activeTab", "scripting"],
   "content_scripts": [
     {
-      "js": ["content.js"
-    ],
+      "js": ["content.js",
+             "./dictionaries/test.js"],
       "matches": ["<all_urls>"]
     }
   ],
