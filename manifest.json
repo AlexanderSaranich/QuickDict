@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Quick Define & AI",
+  "version": "1.0",
+  "permissions": ["activeTab", "scripting"],
+  "content_scripts": [
+    {
+      "js": ["content.js",
+             "./dictionaries/test.js",
+             "./extension/lib/levanshtein.js"
+    ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
