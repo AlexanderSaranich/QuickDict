@@ -1,5 +1,3 @@
-import { distance } from "./extension/lib/levanshtein.js"
-import { testDict } from "./dictionaries/test.js"
 console.log("script loaded")
 let lastMouseEvent = null
 document.addEventListener("mousemove",(e1) => {

@@ -5,11 +5,12 @@
   "permissions": ["activeTab", "scripting"],
   "content_scripts": [
     {
-      "js": ["content.js",
-             "./dictionaries/test.js",
-             "./extension/lib/levanshtein.js"
+      "js": ["content.js"
     ],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+    "dependencies": {
+    "fastest-levenshtein": "^1.0.16"
+  }
 }
