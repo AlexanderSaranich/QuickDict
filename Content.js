@@ -3,20 +3,20 @@ let lastMouseEvent = null
 document.addEventListener("mousemove",(e1) => {
   lastMouseEvent = e1
 })
-
 document.addEventListener('keydown',(e2) => {
     if(e2.shiftKey) {
+
         const word = getWordFromMouse(lastMouseEvent)
         if (word && word.length > 0) {
             fetchDefinition(word);
-            console.log("At fetching word")
-        }
-        else {
+        } else {
+          console.log("Could not fetch word")
         }
     }
 });
 
 function getWordFromMouse(word) {
+  console.log(word)
   let caret;
   if (document.caretPositionFromPoint) {
     caret = document.caretPositionFromPoint(word.clientX,word.clientY)
@@ -36,28 +36,29 @@ function getWordFromMouse(word) {
   return text.slice(start,end) || null
 }
 
-function fetchDefinition(text) {
-  // Use a free API like DictionaryAPI.dev
-  // const apiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
-  // fetch(apiUrl)
-  //   .then(response => {
-  //     if (response.status === 404) {
-  //         fuzzyMatch(word)
-  //     }
-  //     else {
-  //       response.json()
-  //     }
-  //   })
-  //   .then(data => {
-  //     // 2. Display the result
-  //     const word = data[0].word;
-  //     const phonetics = data[0].phonetic;
-  //     const definition = data[0].meanings[0].definitions[0].definition;
-  let word = testDict[text].word
-  let phonetics = testDict[text].phonetics
-  let definition = testDict[text].def
-  if (word) showTooltip(word, definition, phonetics);
+function fetchDefinition(word) {
+  const apiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
+  fetch(apiUrl)
+    .then(async response => {
+      if (response.status === 404) {
+        const fuzzyWord = await awaitMes("levanshtein",word).then(fuzzies => {return fuzzies});
+        const newUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${fuzzyWord}`
+        console.log("levanshtein'd to " + fuzzyWord)
+        newResponse = fetch(newUrl).then(e => {return e.json()})
+        return newResponse
+      }
+      return response.json()
+    })
+    .then(data => {
+      if (!data) return;
+      // 2. Display the result
+    const word = data[0].word
+    const phonetics = data[0].phonetic
+    const definition = data[0].meanings[0].definitions[0].definition
+  if (word) showTooltip(word, definition, phonetics)
   else console.log("no word")
+      }
+    )
 }
 
 function showTooltip(word, definition = "bruh", phonetics = "") {
@@ -90,4 +91,8 @@ function showTooltip(word, definition = "bruh", phonetics = "") {
      // Call your AI function here
      console.log("Trigger AI explanation...");
   });
+}
+
+async function awaitMes(mes, data) {
+  return chrome.runtime.sendMessage({type: mes, data: data})
 }
