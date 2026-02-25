@@ -1,0 +1,9 @@
+{
+  "name": "quick-define-ai",
+  "version": "1.0.0",
+  "description": "Quick Define & AI Extension",
+  "dependencies": {
+    "fastest-levenshtein": "^1.0.16",
+    "firebase": "^10.0.0"
+  }
+}
