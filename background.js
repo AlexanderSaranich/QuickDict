@@ -1,6 +1,18 @@
-// c:\Users\alex\Downloads\Programming\Ind Project\QuickDict\background.js
+import { initializeApp } from "firebase/app";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { distance, closest } from "fastest-levenshtein";
+const firebaseConfig = {
+  apiKey: "AIzaSyC8S5rt-xT0e-x6DDZbhro2zHjtuKX16Oc",
+  authDomain: "quick-dict-90f49.firebaseapp.com",
+  projectId: "quick-dict-90f49",
+  storageBucket: "quick-dict-90f49.firebasestorage.app",
+  messagingSenderId: "170646181573",
+  appId: "1:170646181573:web:d580c74b36cf675c8642ac",
+  measurementId: "G-9F1HSKJ4BF"
+};
 
-import { distance, closest } from "./node_modules/fastest-levenshtein/mod.js";
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 let englishDict = [];
 
@@ -11,21 +23,32 @@ fetch(chrome.runtime.getURL('meta/english.txt'))
     englishDict = text.split(/\r?\n/);
   });
 
-// Listen for messages from Content.js
+function levanshtein(word) {
+  return closest(word,englishDict)
+}
 
-// chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-//   if (request.type === 'fuzzyMatch') {
-//     // Find the closest word using the loaded dictionary
-//     const match = closest(request.word, englishDict);
-//     console.log(`resolved to ${match}`)
-//     sendResponse({ closestWord: match });
-//   }
-// });
 chrome.runtime.onMessage.addListener((message, sender, sendresponse) => {
   if (message.type === "levanshtein") {
     sendresponse(levanshtein(message.data))
   }
+  if (message.type == 'createUserWithEmailAndPassword') {
+        (async () => {
+            try {          
+                const userCredential = await createUserWithEmailAndPassword(auth,message.data.email,message.data.pass)
+                const user = userCredential.user
+                console.log("welcome, " + user.uid)
+            } catch (e) {
+                if (e.code === 'auth/email-already-in-use') {
+        alert("That email is already registered.");
+    } else if (e.code === 'auth/weak-password') {
+        alert("Password is too weak.");
+    } else {
+        console.error(e.message);
+    }
+            }
+        })();
+    }
+    // handle logout
+    if (message.command == 'logoutAuth'){
+    }
 })
-function levanshtein(word) {
-  return closest(word,englishDict)
-}

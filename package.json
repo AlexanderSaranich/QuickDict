@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Quick Define & AI Extension",
   "dependencies": {
+    "esbuild": "^0.27.3",
     "fastest-levenshtein": "^1.0.16",
-    "firebase": "^10.0.0"
+    "firebase": "^10.14.1"
   }
 }

@@ -5,7 +5,7 @@ document.addEventListener("mousemove",(e1) => {
 })
 document.addEventListener('keydown',(e2) => {
     if(e2.shiftKey) {
-
+        if (!lastMouseEvent) return;
         const word = getWordFromMouse(lastMouseEvent)
         if (word && word.length > 0) {
             fetchDefinition(word);
@@ -44,7 +44,7 @@ function fetchDefinition(word) {
         const fuzzyWord = await awaitMes("levanshtein",word).then(fuzzies => {return fuzzies});
         const newUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${fuzzyWord}`
         console.log("levanshtein'd to " + fuzzyWord)
-        newResponse = fetch(newUrl).then(e => {return e.json()})
+        const newResponse = fetch(newUrl).then(e => {return e.json()})
         return newResponse
       }
       return response.json()
@@ -83,16 +83,71 @@ function showTooltip(word, definition = "bruh", phonetics = "") {
   tooltip.innerHTML = `<p><strong>${word}</strong></p>`
   if (phonetics !== "") tooltip.innerHTML += `<p>${phonetics}</p>`
   tooltip.innerHTML += `<p>${definition}</p><button id="ai-btn">AI Explain</button>`;
+  tooltip.innerHTML += `<button id="sign-btn">Sign in</button>`;
 
   document.body.appendChild(tooltip);
-
-  // Add listener for the new AI button
   document.getElementById('ai-btn').addEventListener('click', () => {
-     // Call your AI function here
      console.log("Trigger AI explanation...");
   });
+
+  document.addEventListener('click', (e) => {
+    if (e.target.id === 'sign-btn') {
+        if (document.getElementById('create-acc-btn')) toggleElement(tooltip, 'create-acc-container');
+        toggleElement(tooltip, 'login-container');
+    }
+    else if (e.target.id === 'create-acc-btn') {
+        toggleElement(tooltip, 'create-acc-container');
+    }
+    else if (e.target.id === 'create-btn') {
+      const credentials = getEmailAndPassword()
+      ;(async () => {await awaitMes("createUserWithEmailAndPassword",credentials)})();
+    }
+    });
+    function toggleElement(parent, id) {
+    const el = document.getElementById(id);
+    !el ? render(parent, id) : parent.removeChild(el);
+    }
+    function getEmailAndPassword() {
+      return {
+        email: document.querySelector("#user").value, 
+        pass: document.querySelector("#pass").value};
+    }
+}
+
+function createAccDropdown(parent) {
+  !document.getElementById('create-acc-container') ? render(parent,'create-acc-container') : parent.removeChild(document.getElementById('create-acc-container'))
 }
 
 async function awaitMes(mes, data) {
   return chrome.runtime.sendMessage({type: mes, data: data})
+}
+
+function render(parent, page) {
+  if (page === 'create-acc-container') {
+    const createAccContainer = document.createElement('div');
+    createAccContainer.id = 'create-acc-container'; // Set an ID to track it
+    createAccContainer.innerHTML = `
+        <div style="margin-top: 10px; border-top: 1px solid #555; pt: 10px;">
+          <label for="user">Username:</label>
+          <input type="text" id="user" name="username"><br>
+          <label for="pass">Password:</label>
+          <input type="password" id="pass" name="password">
+          <button id="create-btn">confirm</button>
+        </div>`;
+    parent.appendChild(createAccContainer);
+  }
+  else if (page === 'login-container') {
+      const loginContainer = document.createElement('div');
+      loginContainer.id = 'login-container';
+      loginContainer.innerHTML = `
+        <div style="margin-top: 10px; border-top: 1px solid #555; pt: 10px;">
+          <label for="user">Username:</label>
+          <input type="text" id="user" name="username"><br>
+          <label for="pass">Password:</label>
+          <input type="password" id="pass" name="password">
+          <button id="create-acc-btn">Create Account</button>
+        </div>`;
+      parent.appendChild(loginContainer);
+    }
+
 }
